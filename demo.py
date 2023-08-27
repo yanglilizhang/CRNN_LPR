@@ -64,7 +64,7 @@ def init_model(device,model_path):
     cfg = check_point['cfg']
     model = myNet_ocr(num_classes=len(plate_chr),export=True,cfg=cfg)        #export  True 用来推理
     # model =build_lprnet(num_classes=len(plate_chr),export=True)
-    model.load_state_dict(model_state)
+    model.load_state_dict(model_state,strict=False)
     model.to(device)
     model.eval()
     return model
