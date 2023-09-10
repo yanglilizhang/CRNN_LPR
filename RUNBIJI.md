@@ -15,6 +15,11 @@ $ python demo.py --model_path saved_model/plate_rec_color.pth --image_path image
 上面是load_state_dict方法参数的官方说明 strict  参数默认是true，他的含义是 是否严格要求state_dict中的键与该模块的键返回的键匹配
 就是说，如果strict 置为false那么就可以忽略掉报错，请注意是忽略哦！！！
 
+
+train.py
+config = yaml.load(f, Loader=yaml.FullLoader)
+# config = yaml.load(f)
+
 Traceback (most recent call last):
   File "demo.py", line 84, in <module>
     model = init_model(device,opt.model_path)
