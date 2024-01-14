@@ -11,7 +11,7 @@ from lib.dataset import get_dataset
 from lib.core import function
 from lib.utils.utils import model_info
 from plateNet import myNet_ocr
-from  alphabets import plateName,plate_chr
+from alphabets import plateName,plate_chr
 from LPRNet import build_lprnet
 
 from tensorboardX import SummaryWriter
@@ -20,28 +20,30 @@ def parse_arg():
     parser = argparse.ArgumentParser(description="train crnn")
     
     parser.add_argument('--cfg', help='experiment configuration filename', required=True, type=str)
-    parser.add_argument('--img_h', type=int, default=48, help='height') 
-    parser.add_argument('--img_w',type=int,default=168,help='width')
+    parser.add_argument('--img_h', type=int, default=48, help='height')   # 模型input的h
+    parser.add_argument('--img_w',type=int,default=168,help='width')      # 模型input的w
+
     args = parser.parse_args()
    
     with open(args.cfg, 'r') as f:
         config = yaml.load(f, Loader=yaml.FullLoader)
         # config = yaml.load(f)
+        # 将config转化为edict形式的  即从config['DATASET']['ALPHABETS']变成config.DATASET.ALPHABETS']
         config = edict(config)
 
-    config.DATASET.ALPHABETS = plateName
-    config.MODEL.NUM_CLASSES = len(config.DATASET.ALPHABETS)
-    config.HEIGHT=args.img_h
-    config.WIDTH = args.img_w
+    config.DATASET.ALPHABETS = plateName  # 字符集plate_name 比plate_chr少了一个blank字符"#"
+    config.MODEL.NUM_CLASSES = len(config.DATASET.ALPHABETS)  # 字符集plate_name长度 77
+    config.HEIGHT=args.img_h  # 输入图片的h
+    config.WIDTH = args.img_w  # 输入图片的w
     return config
 
 
 def main():
 
-    # load config
+    # 加载config
     config = parse_arg()
 
-    # create output folder
+    # 所有保存文件的输出路径
     output_dict = utils.create_log_folder(config, phase='train')
 
     # cudnn
@@ -140,6 +142,7 @@ def main():
     )
 
     best_acc = 0.5
+    # 利用{'#': 0, '京': 1, ......}中的一一对应关系 将车牌名字转化为对应的数字
     converter = utils.strLabelConverter(config.DATASET.ALPHABETS)
     for epoch in range(last_epoch, config.TRAIN.END_EPOCH):
 

@@ -7,6 +7,12 @@ $ pip install tensorboard -i https://mirrors.aliyun.com/pypi/simple/
 $ conda install pytorch::pytorch torchvision torchaudio -c pytorch
 $ pip install opencv-python -i https://mirrors.aliyun.com/pypi/simple/
 
+1.解析数据集打上标签,生成train.txt和val.txt的程序
+python plateLabel.py --image_path your/train/img/path/ --label_file datasets/train.txt
+python plateLabel.py --image_path your/val/img/path/ --label_file datasets/val.txt
+
+https://blog.csdn.net/shilichangtin/article/details/135005410?spm=1001.2014.3001.5502 代码解析
+https://blog.csdn.net/shilichangtin/article/details/134984373 yolov7
 
 $ python demo.py --model_path saved_model/plate_rec_color.pth --image_path images/test.jpg
 输出车牌号
