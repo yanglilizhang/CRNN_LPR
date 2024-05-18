@@ -146,8 +146,9 @@ class myNet_ocr_color(nn.Module):
             b, c, h, w = x.size()
             assert h == 1, "the height of conv must be 1"
             conv = x.squeeze(2) # b *512 * width
-            conv = conv.permute(2, 0, 1)  # [w, b, c]
-            output = F.log_softmax(conv, dim=2)
+            conv = conv.permute(2, 0, 1)  # [w, b, c] 将维度变换为 [width, batch_size, channels]
+            output = F.log_softmax(conv, dim=2) # 对通道维度上的值应用 log_softmax 函数，进行归一化处理
+            # print("output.shape=", output.shape)
             if self.color_num:
                 return output,x_color
             return output
