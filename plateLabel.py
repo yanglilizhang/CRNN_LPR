@@ -6,16 +6,22 @@ import shutil
 import argparse
 from alphabets import plate_chr  # 导入车牌可能出现的所有字符
 
-
 # 遍历rootfile文件下所有图片
 def allFileList(rootfile, allFile):
-    folder = os.listdir(rootfile)
+    """
+    遍历指定根目录下的所有文件和子目录，将所有文件的路径添加到指定的列表中。
+
+    :param rootfile: 根目录的文件路径。
+    :param allFile: 用于收集所有文件路径的列表。
+    """
+    folder = os.listdir(rootfile)  # 列出根目录下的所有文件和子目录
     for temp in folder:
-        fileName = os.path.join(rootfile, temp)
-        if os.path.isfile(fileName):
+        fileName = os.path.join(rootfile, temp)  # 拼接当前文件或目录的完整路径
+        if os.path.isfile(fileName):  # 如果是文件，则添加到allFile列表中
             allFile.append(fileName)
-        else:
+        else:  # 如果是目录，则递归调用allFileList继续遍历该目录下的文件和子目录
             allFileList(fileName, allFile)
+
 
 
 # 判断车牌名是不是在palteStr中  当车牌名不在plateStr中的 return False
@@ -36,6 +42,7 @@ if __name__ == "__main__":
     labelFile = opt.label_file
     # palteStr=r"#京沪津渝冀晋蒙辽吉黑苏浙皖闽赣鲁豫鄂湘粤桂琼川贵云藏陕甘青宁新学警港澳挂使领民深危险品0123456789ABCDEFGHJKLMNPQRSTUVWXYZ"
     # palteStr=r"#京沪津渝冀晋蒙辽吉黑苏浙皖闽赣鲁豫鄂湘粤桂琼川贵云藏陕甘青宁新学警港澳挂使领民航深0123456789ABCDEFGHJKLMNPQRSTUVWXYZ"
+    # plate_chr=r"#京沪津渝冀晋蒙辽吉黑苏浙皖闽赣鲁豫鄂湘粤桂琼川贵云藏陕甘青宁新学警港澳挂使领民航危0123456789ABCDEFGHJKLMNPQRSTUVWXYZ险品"
     palteStr = plate_chr
     print(len(palteStr))
 
@@ -68,5 +75,6 @@ if __name__ == "__main__":
         picNum += 1
         # print(jpgFile+labelStr)
         # 将图片路径和对应的标签写入labelFile中  如 datasets/val\云A008BC_0.jpg 25 52 42 42 50 53 54
+        # 如：/content/drive/MyDrive/u_train/recognition_dir/val_verify/渝G12775_0.jpg 4 58 43 44 49 49 47
         fp.write(jpgFile + labelStr + "\n")
     fp.close()

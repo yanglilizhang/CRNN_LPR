@@ -41,3 +41,21 @@ $ python demo_plate_color.py --model_path saved_model/plate_rec_color.pth --imag
 
 
 $ pip install tensorboardX -i https://mirrors.aliyun.com/pypi/simple/
+
+
+不能保证长度是固定
+img = cv2.resize(img, (0,0), fx=self.inp_w / img_w, fy=self.inp_h / img_h, interpolation=cv2.INTER_CUBIC)
+img = cv2.resize(img, (self.input_w,self.input_h))
+
+def getitem(self, idx):
+统一宽度，不够400，填充黑色；
+bk = np.ones(shape=[self.input_h,400,3], dtype=np.uint8)
+#bk = cv2.Mat(cv2.Size(400,self.input_h),cv2.CV_8UC3)
+dstw = (int)(img_w*self.input_h/img_h)
+img = cv2.resize(img, (dstw,self.input_h))
+bk[0:self.input_h,0:dstw] = img
+#roim = bk[0:dstw,0:self.input_h]			
+#roim = img
+cv2.imwrite("out1.jpg",img)
+img = bk
+cv2.imwrite("out.jpg",img)

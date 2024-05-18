@@ -98,6 +98,12 @@ def val(epoch):
 	# torch.save(model.state_dict(),exModelName)
 	torch.save({'cfg': cfg, 'state_dict': model.state_dict()}, exModelName)
 
+
+# 已有字符识别模型的情况下 训练颜色分支
+# 1.准备自己的数据集
+# 2.准备你训练好的车牌字符识别模型
+# 3.训练
+# python train_fix_color.py --weights saved_model/plate_rec.pth --train_path datasets/train  --val_path datasets/val --model_path color_model
 if __name__=='__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('--weights',type=str,default='output/360CC/crnn/2023-01-15-08-55/checkpoints/checkpoint_72_acc_0.9660.pth')  #车牌识别模型
@@ -111,15 +117,15 @@ if __name__=='__main__':
 	parser.add_argument('--gpu', type=str, default='0')
 	parser.add_argument('--model_path',type=str,default='color_model',help='model_path')
 	opt = parser.parse_args()
-   
 	print(opt)
-    
+
 	os.environ["CUDA_VISIBLE_DEVICES"] = opt.gpu
-	device = torch.device("cuda")
+	# device = torch.device("cuda")
+	device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
 	torch.backends.cudnn.benchmark = True
 	if not os.path.exists(opt.model_path):
 		os.mkdir(opt.model_path)
-  
 	mean_value=(0.588,0.588,0.588)
 	std_value=(0.193,0.193,0.193)
 

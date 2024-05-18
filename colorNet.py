@@ -164,4 +164,5 @@ if __name__ == '__main__':
     # print(model)
     # model.eval()
     out,color= model(x)
-    print(out.shape)
+    print(out.shape) #torch.Size([1, 21, 78])
+    print(color.shape) #torch.Size([1, 5])

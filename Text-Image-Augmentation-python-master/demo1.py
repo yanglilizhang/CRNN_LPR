@@ -24,7 +24,11 @@ def create_gif(image_list, gif_name, duration=0.1):
     imageio.mimsave(gif_name, frames, 'GIF', duration=duration)
     return
 
-
+# 数据增强
+# cd Text-Image-Augmentation-python-master
+# python demo1.py --src_path /mnt/Gu/trainData/test_aug --dst_path /mnt/Gu/trainData/result_aug/
+# src_path 是数据路径， dst_path是保存的数据路径
+# 然后把两份数据放到一起进行训练，效果会好很多！
 if __name__ == '__main__':
     parser =argparse.ArgumentParser()
     parser.add_argument('--src_path', type=str, default='d:/sjzq', help='model.pt path(s)')

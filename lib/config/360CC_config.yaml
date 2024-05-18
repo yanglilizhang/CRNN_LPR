@@ -1,63 +1,110 @@
-GPUID: 0
-WORKERS: 8
-PRINT_FREQ: 100
-SAVE_FREQ: 2
-PIN_MEMORY: False
-OUTPUT_DIR: 'output'
+# 配置文件参数说明
+#
+# PRINT_FREQ: 训练过程中打印日志的频率，单位为批次
+# SAVE_FREQ: 模型保存的频率，单位为epoch
+# PIN_MEMORY: 是否将数据pin到内存中以提高数据传输速度，True表示启用，False表示禁用
+# OUTPUT_DIR: 训练输出目录，保存模型、日志等文件
+#
+GPUID: 0        # 指定使用的GPU设备ID，默认为0，表示使用第一块GPU
+WORKERS: 8      # 数据加载时使用的worker进程数，用于加快数据加载速度
+PRINT_FREQ: 100 # 每100个批次打印一次日志
+SAVE_FREQ: 2    # 每2个epoch保存一次模型
+PIN_MEMORY: False  # 禁用数据的内存pinning
+OUTPUT_DIR: 'output'  # 输出目录设置为'output'
 
+
+# CUDNN配置段，用于设置CUDNN库的相关行为
 CUDNN:
+  # 是否开启性能测试。当设置为True时，CUDNN会在运行时选择最快的算法，可能会牺牲一些确定性。
   BENCHMARK: True
+  # 是否确保算法的输出对于同样的输入是始终一致的。设置为False时，CUDNN可能会选择更快而不是更确定的算法。
   DETERMINISTIC: False
+  # 是否启用CUDNN加速。True表示使用CUDNN库进行计算加速，这是通常的设置。
   ENABLED: True
 
+# 定义数据集配置
 DATASET:
   DATASET: 360CC
-  ROOT: ""
+  ROOT: ""   # 数据集根目录
+  # 字符集文件路径，用于指定数据集中可能出现的字符
   # CHAR_FILE: 'lib/dataset/txt/chars_5990.txt'
   CHAR_FILE: 'lib/dataset/txt/plate2.txt'
+  # 训练和验证数据的JSON文件路径
   JSON_FILE: {'train': 'datasets/train.txt', 'val': 'datasets/val.txt'}
 #  JSON_FILE: {'train': 'H:/DL-DATASET/360M/train.txt', 'val': 'H:/DL-DATASET/360M/test.txt'}
-  SCALE_FACTOR: 0.25
-  ROT_FACTOR: 30
-  STD: 0.193
-  MEAN: 0.588
-  ALPHABETS: ''
+  SCALE_FACTOR: 0.25    # 数据缩放因子
+  ROT_FACTOR: 30        # 数据旋转角度因子
+  STD: 0.193            # 数据的标准差
+  MEAN: 0.588           # 数据的均值
+  ALPHABETS: ''         # 字母表设置，留空-代码中进行配置
 
+# 定义训练相关的配置参数
 TRAIN:
+  # 每个GPU的批处理大小-影响训练速度和效果
   BATCH_SIZE_PER_GPU: 256  # 384
+  # 是否打乱数据顺序
   SHUFFLE: True
+  # 训练开始的epoch
   BEGIN_EPOCH: 0
+  # 训练结束的epoch
   END_EPOCH: 100
+  # 恢复训练的设置
   RESUME:
+    # 是否从指定文件恢复训练
     IS_RESUME: False
+    # 恢复训练的checkpoint文件路径
     FILE: '/mnt/Gpan/Mydata/pytorchPorject/myCrnnPlate/output/360CC/crnn/2022-01-25-22-39/checkpoints/checkpoint_41_acc_0.8977.pth'
+  # 优化器选择
   OPTIMIZER: 'adam'
+  # 学习率
   LR: 0.001
+  # 权重衰减
   WD: 0.0
+  # 学习率衰减的epoch步骤
   LR_STEP: [60, 80]
-  # LR_STEP: [40,80,120,180]
+  # LR_FACTOR: 学习率衰减因子
   LR_FACTOR: 0.1
+  # 动量参数，仅当优化器为sgd时使用
   MOMENTUM: 0.0
+  # 是否使用Nesterov动量，仅当优化器为sgd时使用
   NESTEROV: False
+  # RMSPROP优化器的参数
   RMSPROP_ALPHA:
   RMSPROP_CENTERED:
+  # 细调设置
   FINETUNE:
+    # 是否进行细调
     IS_FINETUNE: False
+    # 细调使用的checkpoint文件路径
     FINETUNE_CHECKPOINIT: '/mnt/Gpan/Mydata/pytorchPorject/myCrnnPlate/output/360CC/crnn/2022-01-25-23-21/checkpoints/checkpoint_93_acc_0.9422.pth'
+    # 是否冻结部分层进行细调
     FREEZE: true
 
+
+# 定义测试配置
 TEST:
+  # 每个GPU的批处理大小
   BATCH_SIZE_PER_GPU: 128
-  SHUFFLE: True  # for random test rather than test on the whole validation set
+  # 是否打乱数据顺序，用于随机测试而不是在整个验证集上进行测试
+  SHUFFLE: True
+  # 测试样本的数量
   NUM_TEST: 1000
+  # 显示测试结果的频率
   NUM_TEST_DISP: 10
 
+
+# 定义一个模型配置的块
 MODEL:
+  # 模型名称
   NAME: 'crnn'
+  # 图像尺寸配置
   IMAGE_SIZE:
-    OW: 280 # origial width: 280
-    H: 32
-    W: 100   # resized width: 160
+    OW: 280 # 原始宽度为280
+    H: 32   # 高度为32
+    W: 100  # 调整后的宽度为100
+  # 类的数量，0表示未指定具体数量
   NUM_CLASSES: 0
+  # 隐藏层的单元数
   NUM_HIDDEN: 256
+
 
