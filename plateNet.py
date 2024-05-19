@@ -98,6 +98,7 @@ class myNet_ocr(nn.Module):
             if self.trt:
                 conv = conv.argmax(dim=2)
                 conv = conv.float()
+            print("--->conv.shape:", conv.shape)
             return conv
         else:
             # 获取张量的尺寸，用于后续处理
@@ -111,7 +112,7 @@ class myNet_ocr(nn.Module):
             output = F.log_softmax(conv, dim=2)
             # 注释掉的softmax激活函数（可能用于验证或其他目的）
             # output = torch.softmax(conv, dim=2)
-
+            print("--->output.shape:", output.shape)
             return output
 
 
