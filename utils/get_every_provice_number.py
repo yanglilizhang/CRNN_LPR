@@ -10,7 +10,8 @@ def allFilePath(rootPath,allFIleList):
 
 if __name__=="__main__":
     palteStr=r"京沪津渝冀晋蒙辽吉黑苏浙皖闽赣鲁豫鄂湘粤桂琼川贵云藏陕甘青宁新学警港澳挂使领民"
-    file_path =r"/mnt/Gu/trainData/plate/new_git_train/CCPD_CRPD_OTHER/"
+    # file_path =r"/mnt/Gu/trainData/plate/new_git_train/CCPD_CRPD_OTHER/"
+    file_path =r"/Users//Downloads/CCPDandCRPD车牌识别训练集/CCPD_CRPD_OTHER_ALL/"
     file_list=[]
     pro_dict={}
     for province in palteStr:

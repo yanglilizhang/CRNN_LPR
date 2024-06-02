@@ -1,4 +1,6 @@
 # from plateNet import myNet_ocr
+import shutil
+
 from colorNet import myNet_ocr_color
 import torch
 import torch.nn as nn
@@ -90,11 +92,14 @@ def init_model(device, model_path):
 #  python demo_plate_color.py --model_path saved_model/plate_rec_color_backup.pth --image_path /Users/Downloads/plate
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model_path', type=str, default=r'color_model/0.989720_epoth_50_model.pth',
-                        help='model.pt path(s)')
-    parser.add_argument('--image_path', type=str, default=r'/mnt/EPan/carPlate/@realTest2_noTraining/realrealTest/',
-                        help='source')
-    # parser.add_argument('--image_path', type=str, default=r'images', help='source') 
+    # parser.add_argument('--model_path', type=str, default=r'color_model/0.989720_epoth_50_model.pth',help='model.pt path(s)')
+    parser.add_argument('--model_path', type=str, default=r'saved_model/plate_rec_color.pth',help='model.pt path(s)')
+    # parser.add_argument('--image_path', type=str, default=r'/mnt/EPan/carPlate/@realTest2_noTraining/realrealTest/',help='source')
+    # parser.add_argument('--image_path', type=str, default=r'images', help='source')
+    # parser.add_argument('--image_path', type=str, default=r'/Volumes/Samsung USB/202311-copy', help='source')
+    # parser.add_argument('--image_path', type=str, default=r'/Volumes/Samsung USB/small/202312small5', help='source')
+    parser.add_argument('--image_path', type=str, default=r'/Volumes/Samsung USB/small/error_plates', help='source')
+    # parser.add_argument('--image_path', type=str, default=r'/Volumes/Samsung USB/small/202311small', help='source')
     parser.add_argument('--img_h', type=int, default=48, help='height')
     parser.add_argument('--img_w', type=int, default=168, help='width')
     parser.add_argument('--LPRNet', action='store_true', help='use LPRNet')  # True代表使用LPRNet ,False代表用plateNet
@@ -118,6 +123,11 @@ if __name__ == '__main__':
         file_list = []
         right = 0  # 记录正确识别的车牌数量
         allFilePath(opt.image_path, file_list)  # 收集所有待检测的车牌图像路径
+        # 创建一个新的目录来存放识别错误的车牌图像
+        error_dir = "error_plates"
+        if not os.path.exists(error_dir):
+            os.makedirs(error_dir)
+
         for pic_ in file_list:
             try:
                 pic_name = os.path.basename(pic_)  # 获取图片的文件名
@@ -135,7 +145,9 @@ if __name__ == '__main__':
                     right += 1
                 else:
                     # 打印识别错误的信息
-                    print(plate_ori, "rec as ---> ", plate, pic_, plate_color)
+                    print(plate_ori, "rec error ---> ", plate, pic_, plate_color)
+                    # 将识别错误的车牌图像移动到错误目录
+                    shutil.move(pic_, os.path.join(error_dir, pic_name))
                     # print(plate,pic_name)
             except:
                 print("error")
