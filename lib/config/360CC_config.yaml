@@ -6,7 +6,7 @@
 # OUTPUT_DIR: 训练输出目录，保存模型、日志等文件
 #
 GPUID: 0        # 指定使用的GPU设备ID，默认为0，表示使用第一块GPU
-WORKERS: 8      # 数据加载时使用的worker进程数，用于加快数据加载速度
+WORKERS: 8      # 数据加载时使用的worker进程数，用于加快数据加载速度  dd
 PRINT_FREQ: 100 # 每100个批次打印一次日志
 SAVE_FREQ: 2    # 每2个epoch保存一次模型
 PIN_MEMORY: False  # 禁用数据的内存pinning
