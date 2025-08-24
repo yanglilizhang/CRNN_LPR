@@ -11,6 +11,7 @@ import time
 import argparse
 from alphabets import plate_chr
 from LPRNet import build_lprnet
+import torch.nn.functional as F
 
 
 def cv_imread(path):  # 读取中文路径的图片
@@ -73,6 +74,71 @@ def get_plate_result(img, device, model, img_size):
     return plate, color[preds_color]
 
 
+def get_plate_result_with_confidence(img, device, model, img_size):
+    """
+    从图像中识别车牌并返回结果、颜色及置信度信息
+    所以目前代码中获取的是位置独立分类置信度，而非真正的CTC置信度。！！！！
+
+    参数:
+    img: 输入图像
+    device: 计算设备
+    model: 模型实例
+    img_size: 图像尺寸
+
+    返回值:
+    plate: 车牌字符串
+    plate_color: 车牌颜色
+    confidence_info: 置信度信息
+    """
+    input = image_processing(img, device, img_size)
+    preds, preds_color = model(input)
+
+    # 获取字符识别置信度
+    # preds形状: [1, 21, 78]
+    char_probabilities = F.softmax(preds, dim=2)  # 转换为概率分布
+
+    # 获取每个位置最可能的字符及其置信度
+    char_max_probs, char_max_indices = torch.max(char_probabilities, dim=2)
+    char_max_probs = char_max_probs.view(-1).detach().cpu().numpy()  # [21]
+    char_max_indices = char_max_indices.view(-1).detach().cpu().numpy()  # [21]
+
+    # 解码车牌字符，同时记录有效位置
+    pre = 0
+    newPreds = []
+    valid_positions = []  # 记录有效字符的位置
+    for i in range(len(char_max_indices)):
+        if char_max_indices[i] != 0 and char_max_indices[i] != pre:
+            newPreds.append(char_max_indices[i])
+            valid_positions.append(i)  # 记录位置
+        pre = char_max_indices[i]
+
+    plate = ""
+    for i in newPreds:
+        plate += plate_chr[int(i)]
+
+    # 获取颜色分类置信度
+    # preds_color形状: [1, 5]
+    color_probabilities = F.softmax(preds_color, dim=1)
+    color_max_probs, color_preds = torch.max(color_probabilities, dim=1)
+
+    plate_color = color[color_preds.item()]
+    color_confidence = color_max_probs.item()
+
+    # 构建置信度信息
+    selected_char_confidences = [char_max_probs[pos] for pos in valid_positions] if valid_positions else []
+
+    confidence_info = {
+        'char_confidences': char_max_probs.tolist(),  # 所有21个位置的字符置信度
+        'char_indices': char_max_indices.tolist(),  # 所有21个位置的字符索引
+        'selected_char_confidences': selected_char_confidences,  # 选中的字符置信度
+        'avg_char_confidence': np.mean(selected_char_confidences).item() if selected_char_confidences else 0.0,
+        'color_confidence': color_confidence,
+        'color_probabilities': color_probabilities.view(-1).detach().cpu().numpy().tolist()  # 所有颜色的置信度
+    }
+
+    return plate, plate_color, confidence_info
+
+
 def init_model(device, model_path):
     check_point = torch.load(model_path, map_location=device)
     model_state = check_point['state_dict']
@@ -95,10 +161,10 @@ if __name__ == '__main__':
     # parser.add_argument('--model_path', type=str, default=r'color_model/0.989720_epoth_50_model.pth',help='model.pt path(s)')
     parser.add_argument('--model_path', type=str, default=r'saved_model/plate_rec_color.pth',help='model.pt path(s)')
     # parser.add_argument('--image_path', type=str, default=r'/mnt/EPan/carPlate/@realTest2_noTraining/realrealTest/',help='source')
-    # parser.add_argument('--image_path', type=str, default=r'images', help='source')
+    parser.add_argument('--image_path', type=str, default=r'images/陕CQ3TP_1.jpg', help='source')
     # parser.add_argument('--image_path', type=str, default=r'/Volumes/Samsung USB/202311-copy', help='source')
     # parser.add_argument('--image_path', type=str, default=r'/Volumes/Samsung USB/small/202312small5', help='source')
-    parser.add_argument('--image_path', type=str, default=r'/Volumes/Samsung USB/small/error_plates', help='source')
+    # parser.add_argument('--image_path', type=str, default=r'/Volumes/Samsung USB/small/error_plates', help='source')
     # parser.add_argument('--image_path', type=str, default=r'/Volumes/Samsung USB/small/202311small', help='source')
     parser.add_argument('--img_h', type=int, default=48, help='height')
     parser.add_argument('--img_w', type=int, default=168, help='width')
@@ -116,8 +182,20 @@ if __name__ == '__main__':
         img = cv_imread(opt.image_path)
         if img.shape[-1] != 3:
             img = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
-        plate, plate_color = get_plate_result(img, device, model, img_size)
-        print(plate, plate_color)
+        # plate, plate_color = get_plate_result(img, device, model, img_size)
+        # print(plate, plate_color)
+        plate, plate_color, confidence_info = get_plate_result_with_confidence(img, device, model, img_size)
+
+        print(f"车牌号码: {plate}")
+        print(f"车牌颜色: {plate_color}")
+        print(f"平均字符置信度: {confidence_info['avg_char_confidence']:.4f}")
+        print(f"颜色置信度: {confidence_info['color_confidence']:.4f}")
+
+        # 可选：打印详细置信度信息
+        print("各位置字符索引:", confidence_info['char_indices'])
+        print("各位置字符置信度:", confidence_info['char_confidences'])
+        print("选中的字符置信度:", confidence_info['selected_char_confidences'])
+        print("各颜色置信度:", confidence_info['color_probabilities'])
     elif opt.acc:
         # 计算准确率
         file_list = []

@@ -128,11 +128,27 @@ if __name__ == '__main__':
 
     返回值:
     - 无。此函数不返回任何值，但会打印模型的输出形状。
+    输出张量形状为[1, 21, 78]
+    1: batch size（批次大小）
+    21: 序列长度（车牌字符位置数）
+    78: 类别数（可识别的字符种类）
     """
     x = torch.randn(1, 3, 48, 168)  # 初始化输入张量
     cfg = [32, 'M', 64, 'M', 128, 'M', 256]  # 定义模型结构配置
     model = myNet_ocr(num_classes=78, export=True, cfg=cfg)  # 根据配置创建模型实例
     # print(model)  # 打印模型结构，注释掉了以符合要求
     out = model(x)  # 通过模型进行前向传播
+    # 模型输出形状: [1, 21, 78]
+    # 表示: 1个样本, 21个位置, 78个字符类别
     print(out.shape)  # 打印模型输出的形状 torch.Size([1, 21, 78])
+
+    # 将输出转换为概率分布（置信度）
+    probabilities = F.softmax(out, dim=2)
+    print("置信度形状:", probabilities.shape)  # torch.Size([1, 21, 78])
+    print("各位置置信度:", probabilities)
+    # 获取每个位置最可能的字符及其置信度
+    max_probs, max_indices = torch.max(probabilities, dim=2)
+    print("每位置最高置信度:", max_probs)  # 形状: [1, 21]
+    print("每位置最可能字符:", max_indices)
+
 
